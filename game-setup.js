@@ -1,3 +1,4 @@
+//game-setup.js
 document.addEventListener('DOMContentLoaded', () => {
     const selectedCat = localStorage.getItem('cat');
     const selectedMouse = localStorage.getItem('mouse');
