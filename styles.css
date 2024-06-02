@@ -50,6 +50,7 @@ h2 {
     background-color: #fff;
     border: 1px solid #ccc;
     cursor: pointer;
+    position: relative;
 }
 
 .map-cell.wall {
@@ -63,6 +64,25 @@ h2 {
 .map-cell.border {
     background-color: green;
     pointer-events: none;
+}
+
+.map-cell.reserved {
+    background-color: blue;
+    pointer-events: none;
+}
+
+.entrance-exit {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    color: white;
+    font-weight: bold;
+    font-size: 0.8em;
+    text-align: center;
+    padding: 4px 8px;
+    background-color: rgba(0, 0, 0, 0.7);
+    border-radius: 4px;
 }
 
 .button-container {
