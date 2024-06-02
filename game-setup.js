@@ -1,7 +1,9 @@
+const myDimension = '10';
+
 document.addEventListener('DOMContentLoaded', () => {
     const selectedCat = localStorage.getItem('cat');
     const selectedMouse = localStorage.getItem('mouse');
-    const selectedDimensions = localStorage.getItem('dimensions') || '15';
+    const selectedDimensions = localStorage.getItem('dimensions') || myDimension;
 
     document.getElementById('selected-cat').textContent = selectedCat;
     document.getElementById('selected-mouse').textContent = selectedMouse;
@@ -33,6 +35,7 @@ document.addEventListener('DOMContentLoaded', () => {
             cell.addEventListener('click', () => {
                 if (!cell.classList.contains('border') && !cell.classList.contains('reserved')) {
                     cell.classList.toggle('wall');
+                    updateMapValidity(); // Update validity on click
                 }
             });
 
@@ -40,23 +43,34 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 
-    document.getElementById('start-game').addEventListener('click', () => {
-        const mapConfiguration = [];
-        const cells = document.querySelectorAll('.map-cell');
-        cells.forEach(cell => {
-            if (cell.classList.contains('wall')) {
-                mapConfiguration.push('wall');
-            } else {
-                mapConfiguration.push('empty');
-            }
-        });
+    function logSavedMapConfiguration() {
+    const mapConfiguration = JSON.parse(localStorage.getItem('mapConfiguration'));
 
+    if (!mapConfiguration) {
+        console.log('No map configuration found in local storage.');
+        return;
+    }
+
+    console.log('Saved Map Configuration:');
+    mapConfiguration.forEach(row => {
+        console.log(row.join(' '));
+    });
+    }
+
+    // Call the function to log the map configuration
+    
+
+
+    document.getElementById('start-game').addEventListener('click', () => {
+        const mapConfiguration = getMapConfiguration(dimensions);
+        
         // Validate the map configuration
         if (isValidConfiguration(mapConfiguration, dimensions)) {
             localStorage.setItem('mapConfiguration', JSON.stringify(mapConfiguration));
+            //console.log(localStorage.getItem('mapConfiguration'));
+            logSavedMapConfiguration();
             // Redirect to the game page (dummy URL for now)
-            //window.location.href = 'https://example.com/game';
-            alert("valid game");
+            window.location.href = 'https://ma562.github.io/joseph_ma_cat_mouse_train/';
         } else {
             alert('Invalid map configuration! Ensure there are no isolated paths and every path is reachable from any other path.');
         }
@@ -69,8 +83,50 @@ document.addEventListener('DOMContentLoaded', () => {
                 cell.classList.remove('wall');
             }
         });
+        updateMapValidity(); // Update validity on clear
     });
+
+    // Initial validity check
+    updateMapValidity();
 });
+
+function getMapConfiguration(dimensions) {
+    const mapConfiguration = [];
+    const cells = document.querySelectorAll('.map-cell');
+    let row = [];
+    
+    cells.forEach((cell, index) => {
+        if (cell.classList.contains('wall')) {
+            row.push('-');
+        } else if (cell.classList.contains('border')) {
+            row.push('-');
+        } else if (cell.classList.contains('reserved')) {
+            row.push(' ');
+        } else {
+            row.push(' ');
+        }
+        
+        if ((index + 1) % dimensions === 0) {
+            mapConfiguration.push(row);
+            row = [];
+        }
+    });
+    return mapConfiguration;
+}
+
+function updateMapValidity() {
+    const dimensions = parseInt(localStorage.getItem('dimensions') || myDimension);
+    const mapConfiguration = getMapConfiguration(dimensions);
+    const isValid = isValidConfiguration(mapConfiguration, dimensions);
+    const validityDot = document.getElementById('validity-dot');
+    if (isValid) {
+        validityDot.classList.add('valid');
+        validityDot.classList.remove('invalid');
+    } else {
+        validityDot.classList.add('invalid');
+        validityDot.classList.remove('valid');
+    }
+}
 
 function isValidConfiguration(mapConfiguration, dimensions) {
     class UnionFind {
@@ -110,17 +166,17 @@ function isValidConfiguration(mapConfiguration, dimensions) {
     // Connect adjacent empty cells
     for (let row = 1; row < dimensions - 1; row++) {
         for (let col = 1; col < dimensions - 1; col++) {
-            if (mapConfiguration[getIndex(row, col)] === 'empty') {
-                if (mapConfiguration[getIndex(row - 1, col)] === 'empty') {
+            if (mapConfiguration[row][col] === ' ') {
+                if (mapConfiguration[row - 1][col] === ' ') {
                     uf.union(getIndex(row, col), getIndex(row - 1, col));
                 }
-                if (mapConfiguration[getIndex(row + 1, col)] === 'empty') {
+                if (mapConfiguration[row + 1][col] === ' ') {
                     uf.union(getIndex(row, col), getIndex(row + 1, col));
                 }
-                if (mapConfiguration[getIndex(row, col - 1)] === 'empty') {
+                if (mapConfiguration[row][col - 1] === ' ') {
                     uf.union(getIndex(row, col), getIndex(row, col - 1));
                 }
-                if (mapConfiguration[getIndex(row, col + 1)] === 'empty') {
+                if (mapConfiguration[row][col + 1] === ' ') {
                     uf.union(getIndex(row, col), getIndex(row, col + 1));
                 }
             }
@@ -135,7 +191,7 @@ function isValidConfiguration(mapConfiguration, dimensions) {
 
     for (let row = 1; row < dimensions - 1; row++) {
         for (let col = 1; col < dimensions - 1; col++) {
-            if (mapConfiguration[getIndex(row, col)] === 'empty') {
+            if (mapConfiguration[row][col] === ' ') {
                 if (uf.find(getIndex(row, col)) !== entranceRoot) {
                     return false;
                 }

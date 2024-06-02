@@ -35,7 +35,14 @@ h2 {
 }
 
 .config-info p {
+    display: flex;
+    align-items: center;
     margin: 5px 0;
+}
+
+.config-info span {
+    margin-left: 5px;
+    font-weight: bold;
 }
 
 #map-container {
@@ -104,4 +111,20 @@ button {
 
 button:hover {
     background-color: #0056b3;
+}
+
+.validity-dot {
+    display: inline-block;
+    width: 15px;
+    height: 15px;
+    border-radius: 50%;
+    background-color: red; /* Default invalid */
+}
+
+.valid {
+    background-color: green;
+}
+
+.invalid {
+    background-color: red;
 }
