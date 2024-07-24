@@ -1,4 +1,167 @@
-const myDimension = '10';
+
+function countPaths(grid, startRow, startCol) {
+    let visited = Array.from({ length: grid.length }, () => Array(grid[0].length).fill(false));
+    let count = 0;
+
+    function dfs(row, col) {
+        if (row < 0 || row >= grid.length || col < 0 || col >= grid[0].length) return;
+        if (grid[row][col] === '-' || visited[row][col]) return;
+
+        visited[row][col] = true;
+        count++;
+
+        dfs(row + 1, col);
+        dfs(row - 1, col);
+        dfs(row, col + 1);
+        dfs(row, col - 1);
+    }
+
+    dfs(startRow, startCol);
+    return count;
+}
+
+function isConnected(grid, startRow, startCol, wallRow, wallCol) {
+    if (grid[wallRow][wallCol] === '-') return true;
+
+    let tempGrid = grid.map(row => row.slice());
+    tempGrid[wallRow][wallCol] = '-';
+
+    const originalPathsCount = countPaths(grid, startRow, startCol);
+    const newPathsCount = countPaths(tempGrid, startRow, startCol);
+
+    // Decrement the original paths count by 1 if we placed a wall on a path
+    if (grid[wallRow][wallCol] === ' ') {
+        return originalPathsCount - 1 === newPathsCount;
+    }
+
+    return originalPathsCount === newPathsCount;
+}
+
+function checkDisconnectivity(grid) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const result = Array.from({ length: rows }, () => Array(cols).fill(0));
+
+    const directions = [
+        [1, 0],  // down
+        [-1, 0], // up
+        [0, 1],  // right
+        [0, -1]  // left
+    ];
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (grid[row][col] === '-') {
+                result[row][col] = -1;
+                continue;
+            }
+
+            let isDisconnected = false;
+
+            for (const [dr, dc] of directions) {
+                const wallRow = row + dr;
+                const wallCol = col + dc;
+
+                if (
+                    wallRow >= 0 && wallRow < rows &&
+                    wallCol >= 0 && wallCol < cols &&
+                    grid[wallRow][wallCol] === ' '
+                ) {
+                    if (!isConnected(grid, row, col, wallRow, wallCol)) {
+                        isDisconnected = true;
+                        break;
+                    }
+                }
+            }
+
+            result[row][col] = isDisconnected ? 1 : 0;
+        }
+    }
+
+    return result;
+}
+
+function isDisconnected(grid, startRow, startCol, wallRow, wallCol) {           //returns 1 if we are dead end, else 0
+    // Create a copy of the grid
+    let tempGrid = grid.map(row => row.slice());
+    
+    // Place the imaginary wall
+    tempGrid[wallRow][wallCol] = -1;
+
+    // Define directions for movement (down, up, right, left)
+    const directions = [
+        [1, 0],  // down
+        [-1, 0], // up
+        [0, 1],  // right
+        [0, -1]  // left
+    ];
+
+    function dfs(row, col) {
+        if (row < 0 || row >= tempGrid.length || col < 0 || col >= tempGrid[0].length) return false;
+        if (tempGrid[row][col] === -1 || tempGrid[row][col] === -2) return false;
+        
+        // If we found a 0 cell, return true
+        if (tempGrid[row][col] === 0) {
+            return true;
+        }
+
+        // Mark the cell as visited by changing its value to something other than 0 or -1
+        tempGrid[row][col] = -2;
+
+        for (const [dr, dc] of directions) {
+            const newRow = row + dr;
+            const newCol = col + dc;
+            if (dfs(newRow, newCol)) return true;
+        }
+
+        return false;
+    }
+
+    // Check if the coordinate of interest can reach any 0s
+    return dfs(startRow, startCol) ? 0 : 1;
+}
+
+function createDisconnectivityTable(grid) {
+    const rows = grid.length;
+    const cols = grid[0].length;
+    const result = [];
+
+    const directions = {
+        up: [-1, 0],
+        down: [1, 0],
+        left: [0, -1],
+        right: [0, 1]
+    };
+
+    for (let row = 0; row < rows; row++) {
+        for (let col = 0; col < cols; col++) {
+            if (grid[row][col] === 1) {
+                let rowResult = {
+                    coordinate: [row, col],
+                    up: 0,
+                    down: 0,
+                    left: 0,
+                    right: 0
+                };
+
+                for (const [direction, [dr, dc]] of Object.entries(directions)) {
+                    const wallRow = row + dr;
+                    const wallCol = col + dc;
+
+                    if (wallRow >= 0 && wallRow < rows && wallCol >= 0 && wallCol < cols && grid[row][col] !== -1) {
+                        rowResult[direction] = isDisconnected(grid, row, col, wallRow, wallCol);
+                    }
+                }
+
+                result.push(rowResult);
+            }
+        }
+    }
+
+    return result;
+}
+
+// -------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
     const selectedCat = localStorage.getItem('cat');
@@ -7,7 +170,7 @@ document.addEventListener('DOMContentLoaded', () => {
 
     document.getElementById('selected-cat').textContent = selectedCat;
     document.getElementById('selected-mouse').textContent = selectedMouse;
-    document.getElementById('selected-dimensions').textContent = `${selectedDimensions} x ${selectedDimensions}`;
+    document.getElementById('selected-dimensions').textContent = selectdDimensions//`${selectedDimensions} x ${selectedDimensions}`;
 
     const mapContainer = document.getElementById('map-container');
     const dimensions = parseInt(selectedDimensions);
@@ -57,23 +220,28 @@ document.addEventListener('DOMContentLoaded', () => {
     });
     }
 
+
     // Call the function to log the map configuration
     
 
 
     document.getElementById('start-game').addEventListener('click', () => {
         const mapConfiguration = getMapConfiguration(dimensions);
-        
         // Validate the map configuration
         if (isValidConfiguration(mapConfiguration, dimensions)) {
             localStorage.setItem('mapConfiguration', JSON.stringify(mapConfiguration));
-            //console.log(localStorage.getItem('mapConfiguration'));
             logSavedMapConfiguration();
+
+            let meMap = JSON.parse(localStorage.getItem('mapConfiguration'));
+            let bro = checkDisconnectivity(meMap);
+            console.log(bro);
+            console.log(createDisconnectivityTable(bro));
             // Redirect to the game page (dummy URL for now)
-            window.location.href = 'https://ma562.github.io/joseph_ma_cat_mouse_train/';
+            //window.location.href = 'https://ma562.github.io/joseph_ma_cat_mouse_train/';
         } else {
             alert('Invalid map configuration! Ensure there are no isolated paths and every path is reachable from any other path.');
         }
+
     });
 
     document.getElementById('clear-map').addEventListener('click', () => {
@@ -117,6 +285,7 @@ function getMapConfiguration(dimensions) {
 function updateMapValidity() {
     const dimensions = parseInt(localStorage.getItem('dimensions') || myDimension);
     const mapConfiguration = getMapConfiguration(dimensions);
+    
     const isValid = isValidConfiguration(mapConfiguration, dimensions);
     const validityDot = document.getElementById('validity-dot');
     if (isValid) {
