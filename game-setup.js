@@ -164,13 +164,13 @@ function createDisconnectivityTable(grid) {
 // -------------------------------------------------
 
 document.addEventListener('DOMContentLoaded', () => {
+    let myDimension = 13;
     const selectedCat = localStorage.getItem('cat');
     const selectedMouse = localStorage.getItem('mouse');
     const selectedDimensions = localStorage.getItem('dimensions') || myDimension;
-
     document.getElementById('selected-cat').textContent = selectedCat;
     document.getElementById('selected-mouse').textContent = selectedMouse;
-    document.getElementById('selected-dimensions').textContent = selectdDimensions//`${selectedDimensions} x ${selectedDimensions}`;
+    document.getElementById('selected-dimensions').textContent = selectedDimensions//`${selectedDimensions} x ${selectedDimensions}`;
 
     const mapContainer = document.getElementById('map-container');
     const dimensions = parseInt(selectedDimensions);
