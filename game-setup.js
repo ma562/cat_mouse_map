@@ -192,7 +192,7 @@ document.addEventListener('DOMContentLoaded', () => {
             // Set next row/column inward as entrance and exit
             if ((i === 1 && j === 1) || (i === dimensions - 2 && j === dimensions - 2)) {
                 cell.classList.add('reserved');
-                cell.innerHTML = i === 1 && j === 1 ? '<div class="entrance-exit">Entrance</div>' : '<div class="entrance-exit">Exit</div>';
+                cell.innerHTML = i === 1 && j === 1 ? '<div class="entrance-exit">Exit</div>' : '<div class="entrance-exit">Entrance</div>';
             }
 
             cell.addEventListener('click', () => {
