@@ -236,6 +236,8 @@ document.addEventListener('DOMContentLoaded', () => {
             let bro = checkDisconnectivity(meMap);
             console.log(bro);
             console.log(createDisconnectivityTable(bro));
+            localStorage.setItem('mouse_avatar', 'mouse3.png');
+            localStorage.setItem('cat_avatar', 'cat3.png');
             // Redirect to the game page (dummy URL for now)
             //window.location.href = 'https://ma562.github.io/joseph_ma_cat_mouse_train/';
         } else {
