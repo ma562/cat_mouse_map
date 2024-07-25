@@ -239,7 +239,7 @@ document.addEventListener('DOMContentLoaded', () => {
             localStorage.setItem('mouse_avatar', 'mouse3.png');
             localStorage.setItem('cat_avatar', 'cat3.png');
             // Redirect to the game page (dummy URL for now)
-            //window.location.href = 'https://ma562.github.io/joseph_ma_cat_mouse_train/';
+            window.location.href = 'https://ma562.github.io/joseph_ma_cat_mouse_train/';
         } else {
             alert('Invalid map configuration! Ensure there are no isolated paths and every path is reachable from any other path.');
         }
