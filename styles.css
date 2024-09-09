@@ -128,3 +128,12 @@ button:hover {
 .invalid {
     background-color: red;
 }
+
+/* Smaller grid size for mobile devices */
+@media (max-width: 600px) {
+    .map-cell {
+        width: 20px; /* Decrease the size of the grid cells on mobile */
+        aspect-ratio: 1; /* Keep the cells square */
+    }
+}
+
